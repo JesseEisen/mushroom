@@ -2,10 +2,7 @@
 
 下面是一些Limits:
 
-1. priqueue/queue.h 消息队列使用了两套， 默认是local_queue， 用宏来定义使用哪一个消息队列. 本来打算使用posix消息队列来进行线程间通信的， 但是遇到了并发的问题， 貌似消息队列在同一进程中交换数据会出现异常.
-
-#define LOCAL_QUEUE
-#define POSIX_MQ_QUEUE
+1. priqueue/queue.h 消息队列使用了两套， 默认是local_queue， 用宏来定义使用哪一个消息队列. 本来打算使用posix消息队列来进行线程间通信的， 但是遇到了并发的问题， 貌似消息队列在同一进程中交换数据会出现异常. LOCAL_QUEUE or POSIX_MQ_QUEUE
 
 2. socket_client.h/socket_client.c 对于套接字异常， 我使用了socket_client->sock_err字段来检查的， 专门开了一个watchdog线程， 但是由于sock_err变量并没有做成线程安全的， 因此这里面很可能会有一些小问题， 不过对整个系统影响不大， 顾没有过多考虑。
 
