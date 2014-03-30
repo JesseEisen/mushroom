@@ -1,0 +1,115 @@
+enum SENSOR_TYPE {
+	TEMP = 1;
+	LIGHT = 2;
+	HUMI = 3;
+	CO2 = 4;
+}
+
+enum CONTROLLER_TYPE {
+	XUNHUAN_FAN   = 1;
+	JINFENG_FAN   = 2;
+	PAIFENG_FAN   = 3;
+	JIASHIQI      = 4;
+	YASUOJI       = 5;
+	NEIJI         = 6;
+	YELLO_LIGHT   = 7;
+	RED_LIGHT     = 8;
+	BLUE_LIGHT    = 9;
+}
+
+enum MESSAGE_ID {
+	// System Config 1-1000
+	READ_TIME = 1;
+	READ_TIME_RESPONSE = 2;
+	UPDATE_TIME = 3;
+	UPDATE_TIME_RESPONSE = 4;
+	READ_CONF = 5;
+	READ_CONF_RESPONSE = 6;
+	UPDATE_CONF = 7;
+	UPDATE_CONF_RESPONSE = 8;
+	
+	REBOOT = 9;
+	REBOOT_RESPONSE = 10;
+	
+	// control 1001 - 2000
+	READ_CONTROLLER_STATE = 1001;
+	READ_CONTROLLER_STATE_RESPONSE = 1002;
+	UPDATE_CONTROLLER_STATE = 1003;
+	UPDATE_CONTROLLER_STATE_RESPONSE = 1004;
+	
+	// capture 2001 - 3000
+	READ_SENSOR_DATA = 2001;
+	READ_SENSOR_DATA_RESPONSE = 2002;
+	SENSOR_DATA_PUSH = 2003;
+	
+	// extension 3001-4000
+	PING = 3001;
+
+	INIT = 3002;
+}
+ 
+message Room {
+	required int32 room_id = 1;
+}
+ 
+message Sensor {
+	required int32 id = 1;
+	optional SENSOR_TYPE type = 2;
+	optional int32 value = 3;
+}
+ 
+message SynTime {
+	required string timestamp = 1; //时间格式为："2014-01-08 22:15:42"	 
+}
+
+enum RESPONSE {
+	OK = 0;
+	ERROR = -1;	
+}
+ 
+message ResponseCode {
+	required RESPONSE code = 1;
+	optional string log = 2;
+}
+ 
+message Config {
+	required string key = 1;
+	optional int32  val = 2;
+}
+
+message ConfigList {
+	repeated Config config = 1;
+}
+ 
+message Controller {
+	required int32 controller_id = 1;
+	enum STATE {
+		CLOSE = 0;
+		OPEN =  1;
+		ERROR = -1;
+	}
+	optional STATE state = 2;
+	optional CONTROLLER_TYPE type = 3;
+}
+ 
+message SensorData {
+    required int32 room_id = 1;
+    repeated Sensor sensor = 2;
+    required SynTime time = 3;
+}
+
+message Ping {
+	required string src = 1;
+	required string echo = 2;
+}
+
+message RoomConf {
+	required int32 id = 1;
+	repeated Sensor sensor = 2;
+	repeated Controller controller = 3;
+}
+
+message Init {
+	repeated RoomConf roomconf = 1;
+	repeated Config   config = 2;	
+}
