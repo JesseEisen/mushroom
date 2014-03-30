@@ -8,7 +8,7 @@
 
 3. util.h/util.c 对于fd的读写并没有做严格的检查， 错误errno可能必须考虑多种情况， 但底层我只是把异常看成是错误， 然后会使得系统尝试关闭重新连接， 如果你恰好看到了这个项目， 请着重注意这一部分， 因为我对fd的读写以及信号处理经验有限。（当然EINTR， EAGAIN等还是考虑了， 管道破裂SIGPIPE也添加了signal函数）
 
-4. protobuf编码我采用了protobuf-c开源项目的代码， 提取了它的两个文件protobuf-c/*.[ch], 但是还需要改项目的一个protoc-c工具才能编译成目标.c/.h代码， 但是protoc-c我并不打算移植， 因此需要现在pc机上编译。 当然据我查阅， 另外还有两个protobuf项目： 云风的pbc(https://github.com/cloudwu/pbc)以及nanopb也是不错的选择， 目前并没有打算引入其它的库来编码。
+4. protobuf编码我采用了protobuf-c开源项目的代码， 提取了它的两个文件protobuf-c/*, 但是还需要改项目的一个protoc-c工具才能编译成目标.c/.h代码， 但是protoc-c我并不打算移植， 因此需要现在pc机上编译。 当然据我查阅， 另外还有两个protobuf项目： 云风的pbc(https://github.com/cloudwu/pbc) 以及nanopb也是不错的选择， 目前并没有打算引入其它的库来编码。
 
 5. 严格的线程安全我觉得对于整个项目来说有点过了， 因此我只保证更改数据的时候加锁， init和destroy默认不加锁， 因为我认为这个只能被一个地方调用， 如果不这么用属于滥用， 行为是无法保证的。
 
