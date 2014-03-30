@@ -560,6 +560,8 @@ CALLBACK(READ_CONTROLLER_STATE)
 	message_header_copy(header, &header_resp);
 	header_resp.message_id = MESSAGE__ID__READ_CONTROLLER_STATE_RESPONSE;
 
+	DEBUG("c_dev status:%d\n", c_dev->state);
+
 	Controller c_resp = CONTROLLER__INIT;
 	c_resp.controller_id = c_dev->id;
 	c_resp.has_state = 1;
@@ -610,6 +612,7 @@ CALLBACK(UPDATE_CONTROLLER_STATE)
 		return -1;
 	}
 
+	DEBUG("c_req:%d\n", c_req->state);
 	// change state!!! here
 	c_dev->state = c_req->state;
 //	// TODO: send command to PLC!
