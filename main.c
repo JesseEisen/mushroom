@@ -35,9 +35,9 @@ int readCmdLine(struct socket_client *sc, struct room_model *rm, struct config *
 				} else if (strncmp(buf+5, "init", 4) == 0) {
 					send_init_configure(sc, rm, config);		
 				} else if (strncmp(buf+5, "sensordata", 10) == 0) {
+					send_room_sensor_data(sc, rm, 0);
 					send_room_sensor_data(sc, rm, 1);
 					send_room_sensor_data(sc, rm, 2);
-					send_room_sensor_data(sc, rm, 3);
 				}
 			} else if (strncmp(buf, "dump", 4) == 0) {
 				if (strncmp(buf+5, "config", 6) == 0) {
@@ -163,6 +163,8 @@ void *thread_sensor_data_push(void *arg)
 
 	struct room_model *rm = sa->rm;
 	struct socket_client *sc = sa->sc;
+
+	DEBUG("n_room:%d\n", rm->n_room);
 
 	while (1) {
 		int i, j;

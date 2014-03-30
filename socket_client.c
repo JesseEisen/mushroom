@@ -92,12 +92,12 @@ RESTART:
 	
 		memset(hexdump, 0, sizeof(hexdump));
 		for (i = 0; i < pkt_in->pkt_sz; i++) {
-			snprintf(p, 5, "%02x", payload[i]);
-			p += 4;
+			snprintf(p, 3, "%02x", payload[i]);
+			p += 2;
 		}
 
 //		log_info("%s", hexdump);
-		DEBUG("recv message: MUSHROOM|%d|%s\n", pkt_sz, hexdump);
+		DEBUG("recv message: MUSHROOM|%d|%s\n\n", pkt_sz, hexdump);
 
 		put_data(sc->raw_in, (void *)pkt_in, 1 /* PRIORITY */);
 		//DEBUG("put in address:%p\n", pkt_in);
@@ -219,12 +219,12 @@ RESTART:
 		memset(hexdump, 0, sizeof(hexdump));
 		int i;
 		for (i = 0; i < pkt_out->pkt_sz; i++) {
-			snprintf(p, 5, "%02x", pkt_out->payload[i]);
-			p += 4;
+			snprintf(p, 3, "%02x", pkt_out->payload[i]);
+			p += 2;
 		}
 
 //		log_info("%s", hexdump);
-		DEBUG("send message:MUSHROOM|%d|%s\n", pkt_out->pkt_sz, hexdump);
+		DEBUG("send message:MUSHROOM|%d|%s\n\n", pkt_out->pkt_sz, hexdump);
 
 		free(pkt_out->payload);
 		free(pkt_out);

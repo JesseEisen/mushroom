@@ -747,6 +747,7 @@ int send_room_sensor_data(struct socket_client *sc, struct room_model *rm, int r
 	header.has_type = 1;
 	header.type = MESSAGE_HEADER__TYPE__REQUEST;
 
+	// TODO: find real message_id
 	struct room *r = &rm->room[room_id];
 	sd.room_id = r->id;
 	sd.n_sensor = r->n_sensor;
