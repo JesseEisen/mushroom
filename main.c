@@ -25,11 +25,11 @@ int readCmdLine(struct socket_client *sc, struct room_model *rm, struct config *
 	while(1) {
 		memset(buf, 0, sizeof(buf));
 		nread = read(cmd_fifo, buf, 255);
-		
+
 		if (nread > 0) {
 			//write(STDOUT_FILENO, buf, nread);
 			if (strncmp(buf, "send", 4) == 0) {
-		
+
 				if (strncmp(buf+5, "time", 4) == 0) {
 					send_read_time_request(sc);
 				} else if (strncmp(buf+5, "init", 4) == 0) {
@@ -69,9 +69,9 @@ int readCmdLine(struct socket_client *sc, struct room_model *rm, struct config *
 				// TODO;
 			}
 		} else if (nread == 0) {
-//			DEBUG("fd closed\n");
+			//			DEBUG("fd closed\n");
 		}		
-	
+
 		usleep(200000);
 	}
 
@@ -91,7 +91,7 @@ int test_log()
 	log_warning("hello, test log_warning\n");
 	log_trace("hello, test log_trace\n");
 	log_err("hello, test log_err\n");
-	
+
 	DEBUG("log test passed......\n");
 	return 0;
 }
@@ -107,28 +107,28 @@ int test_config(struct config *config)
 int test_room_model (struct room_model *rm)
 {
 	room_model_dump(rm);
-	
+
 	DEBUG("room_model test passed......\n");
 }
 
 int test_socket_client(struct socket_client *sc)
 {
-//	MessageHeader header = MESSAGE_HEADER__INIT;
-//
-//	header.message_id = i++;
-//	int sz = message_header__get_packed_size(&header);
-//	DEBUG("sz:%d\n", sz);
-		
-//	int i = 0, j = 0;
-//	while (1) {
-//		j++;
-//		if (j == 10) break;
-//		header.message_id = i++;
-//		if (send_message(sc, &header, NULL, 0) < 0) {
-//			DEBUG("send error\n");
-//		}
-//		usleep(100000);
-//	}
+	//	MessageHeader header = MESSAGE_HEADER__INIT;
+	//
+	//	header.message_id = i++;
+	//	int sz = message_header__get_packed_size(&header);
+	//	DEBUG("sz:%d\n", sz);
+
+	//	int i = 0, j = 0;
+	//	while (1) {
+	//		j++;
+	//		if (j == 10) break;
+	//		header.message_id = i++;
+	//		if (send_message(sc, &header, NULL, 0) < 0) {
+	//			DEBUG("send error\n");
+	//		}
+	//		usleep(100000);
+	//	}
 
 	DEBUG("socket client test passed......\n");
 
@@ -182,10 +182,10 @@ void *thread_sensor_data_push(void *arg)
 int sensor_push_start(struct sensor_data_push *sdp)
 {
 	pthread_t tid_sensor_push;
-		
+
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
-		
+
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
 	pthread_create(&tid_sensor_push, &attr, thread_sensor_data_push, (void *)sdp);
@@ -197,10 +197,10 @@ int sensor_push_start(struct sensor_data_push *sdp)
 
 int main(int argc, char *argv[])
 {
-RESTART:
 	signal(SIGPIPE, SIG_IGN); // fd err
 	signal(SIGALRM, SIG_IGN); // usleep
 
+RESTART:
 	// system init
 	log_init("log/info.log", "log/warning.log", "log/trace.log", "log/err.log");
 	test_log();
@@ -233,9 +233,9 @@ RESTART:
 	struct socket_client socket_client;
 #define SOCKET_CLIENT_EATING_THREAD_NUM 1
 	socket_client_start(&socket_client, 
-				config.remote_ip, 
-				config.remote_port, 
-				SOCKET_CLIENT_EATING_THREAD_NUM);	
+			config.remote_ip, 
+			config.remote_port, 
+			SOCKET_CLIENT_EATING_THREAD_NUM);	
 	test_socket_client(&socket_client);
 
 	// 1. send init message
@@ -243,7 +243,7 @@ RESTART:
 
 	// 2. send read_time
 	send_read_time_request(&socket_client);
-	
+
 	// 3. start sensor_push
 	struct sensor_data_push sdp;
 	sdp.sc = &socket_client;
@@ -256,7 +256,7 @@ RESTART:
 		restart = 0;
 		goto RESTART;
 	}
-	
+
 	serial_stop(&serial);
 	socket_client_stop(&socket_client);
 	room_model_destroy(&room_model);

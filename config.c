@@ -6,7 +6,7 @@ int config_load(char *ini_file, struct config *config)
 {
 	assert(config);
 	assert(ini_file);
-	
+
 	memset(config, 0, sizeof(struct config));
 
 
@@ -22,21 +22,21 @@ int config_load(char *ini_file, struct config *config)
 	config->debug_warning = iniparser_getint(ini, "sys:debug_warning", DEBUG_WARNING);
 	config->debug_trace = iniparser_getint(ini, "sys:debug_trace", DEBUG_TRACE);
 	config->debug_err = iniparser_getint(ini, "sys:debug_err", DEBUG_ERR);
-	
+
 	char *remote_ip = iniparser_getstring(ini, "sys:remote_ip", NULL);	
 	assert(remote_ip);
 	sprintf(config->remote_ip, "%s", remote_ip);
 
 
 	config->remote_port = iniparser_getint(ini, "sys:remote_port", -1);
-	
+
 	sprintf(config->serial_path, "%s", iniparser_getstring(ini, "sys:serial", SERIAL_PATH));
 	sprintf(config->db_path, "%s", iniparser_getstring(ini, "sys:db", DB_PATH));
 	sprintf(config->log_info_path, "%s", iniparser_getstring(ini, "sys:log_info", LOG_INFO_PATH));
 	sprintf(config->log_warning_path, "%s", iniparser_getstring(ini, "sys:log_warning", LOG_WARNING_PATH));
 	sprintf(config->log_trace_path, "%s", iniparser_getstring(ini, "sys:log_trace", LOG_TRACE_PATH));
 	sprintf(config->log_err_path, "%s", iniparser_getstring(ini, "sys:log_err", LOG_ERR_PATH));
-	
+
 	config->heartbeat = iniparser_getint(ini, "param:heartbeat", HEARTBEAT);
 	config->time_sync_freq = iniparser_getint(ini, "param:time_sync_freq", TIME_SYNC_FREQ);
 	config->read_plc_freq = iniparser_getint(ini, "param:read_plc_freq", READ_PLC_FREQ);
@@ -56,7 +56,7 @@ int config_dump(struct config *config)
 		DEBUG("config module do not init.\n");
 		return -1;
 	}
-	
+
 	DEBUG("daemon:               %d\n", config->daemon);
 	DEBUG("debug_info:           %d\n", config->debug_info);
 	DEBUG("debug_warning:        %d\n", config->debug_warning);

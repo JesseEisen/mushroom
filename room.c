@@ -7,7 +7,7 @@ int controller_init(struct controller *c, int id, int type)
 {
 	assert(c);
 	assert(id >= 0);
-		
+
 	c->id = id;
 	c->type = type;
 	c->state = CLOSE;
@@ -55,7 +55,7 @@ int controller_get_status(struct controller *c)
 		log_err("controller do not init.\n");
 		return -1;
 	}
-	
+
 	return c->state;
 }
 
@@ -68,8 +68,8 @@ int controller_dump(struct controller *c)
 	}
 
 	DEBUG("Controller: id: %d, type:%d, status:%d\n",
-		c->id, c->type, c->state); 	
-	
+			c->id, c->type, c->state); 	
+
 	return 0;
 }
 
@@ -84,7 +84,7 @@ int sensor_init(struct sensor *sensor, int id, int type, int n_cache)
 	sensor->data = malloc(sizeof(int)*n_cache);
 	assert(sensor->data);
 	memset(sensor->data, 0, sizeof(int)*n_cache);
-	
+
 	sensor->n_cache = n_cache;
 	sensor->current = 0;
 	sensor->fuse = 1 << 16;
@@ -101,7 +101,7 @@ int sensor_add_value(struct sensor *sensor, int value)
 		log_err("sensor do not init\n");
 		return -1;
 	}
-	
+
 	if (sensor->current >= sensor->n_cache) {
 		sensor->current = 0;
 	}
@@ -141,14 +141,14 @@ int sensor_destroy(struct sensor *sensor)
 		log_err("sensor do not init\n");
 		return -1;
 	}
-	
+
 	sensor->id = -1;
 	free(sensor->data);
 	sensor->data = NULL;
 	sensor->n_cache = -1;
 	sensor->current = -1;
 	sensor->fuse = 1 << 16;
-	
+
 	return 0;
 }
 
@@ -159,16 +159,16 @@ int sensor_dump(struct sensor *sensor)
 		log_err("sensor do not init\n");
 		return -1;
 	}
-	
+
 	DEBUG("Sensor: id: %d, type:%d, n_cache:%d, current:%d, fuse:%d\n",
-		sensor->id, sensor->type, sensor->n_cache, sensor->current, sensor->fuse); 	
-	
+			sensor->id, sensor->type, sensor->n_cache, sensor->current, sensor->fuse); 	
+
 	int i;
 	DEBUG("data:|");	
 	for (i = 0; i < sensor->current; i++) {
 		printf("%d|", sensor->data[i]);
 	}
-	
+
 	printf("\n");
 
 	return 0;
@@ -227,10 +227,10 @@ int room_destroy(struct room *r)
 	r->n_sensor = 0;
 	r->sensor = NULL;
 	r->controller = NULL;
-	
+
 	r->n_sensor_used = 0;
 	r->n_controller_used = 0;
-	
+
 	return 0;
 }
 
@@ -247,7 +247,7 @@ int room_add_sensor(struct room *r, struct sensor *sensor)
 		log_err("too many sensor\n");
 		return -1;
 	}
-	
+
 	struct sensor *s = &r->sensor[r->n_sensor_used++];
 	sensor_init(s, sensor->id, sensor->type, sensor->n_cache);
 
@@ -267,7 +267,7 @@ int room_add_controller(struct room *r, struct controller *controller)
 		log_err("too many controller\n");
 		return -1;
 	}
-	
+
 	struct controller *c = &r->controller[r->n_controller_used++];
 	controller_init(c, controller->id, controller->type);
 
@@ -306,7 +306,7 @@ struct sensor* room_find_sensor(struct room *r, int id)
 	for (i = 0; i < r->n_sensor_used; i++) {
 		if (r->sensor[i].id == id) return &r->sensor[i];
 	}
-		
+
 	return NULL;
 }
 
@@ -321,7 +321,7 @@ struct controller* room_find_controller(struct room *r, int id)
 	for (i = 0; i < r->n_controller_used; i++) {
 		if (r->controller[i].id == id) return &r->controller[i];
 	}
-		
+
 	return NULL;
 }
 
@@ -330,23 +330,23 @@ int room_model_load(struct room_model *rm, char *db_file)
 	assert(rm);
 	assert(db_file);
 	rm->BASE.magic = MAGIC_NUMBER;
-	
+
 	sqlite3 *conn;
 	int error;
 	error = sqlite3_open(db_file, &conn);
 	assert(error == 0);
-	
+
 	sqlite3_stmt    *res;
 	int     rec_count = 0;
 	const char      *tail;
 
 	// 1. get room info
 	char *sql = "select tb_sensor.room_id, tb_sensor.sensor_num, tb_controller.controller_num "\
-		    "from (select room_id, count(sensor_id) as sensor_num "\
-		    "from sensor group by room_id) as tb_sensor "\
-		    "left join (select room_id, count(controller_id) as controller_num "\
-		    "	       from controller group by room_id)    as tb_controller "\
-    	            "on tb_sensor.room_id = tb_controller.room_id;";
+		     "from (select room_id, count(sensor_id) as sensor_num "\
+		     "from sensor group by room_id) as tb_sensor "\
+		     "left join (select room_id, count(controller_id) as controller_num "\
+		     "	       from controller group by room_id)    as tb_controller "\
+		     "on tb_sensor.room_id = tb_controller.room_id;";
 
 	int len = strlen(sql);
 
@@ -358,11 +358,11 @@ int room_model_load(struct room_model *rm, char *db_file)
 	}
 
 	sqlite3_reset(res);
-	
+
 	rm->n_room = rec_count;
 	rm->room = malloc(sizeof(struct room)*(rm->n_room));
 	assert(rm->room);
-	
+
 	int i = 0;
 	while (sqlite3_step(res) == SQLITE_ROW) {
 		int n_sensor = sqlite3_column_int(res, 1);
@@ -379,18 +379,18 @@ int room_model_load(struct room_model *rm, char *db_file)
 		exit(-1);
 	}	
 
-//	// 2. init every sensor and controller
+	//	// 2. init every sensor and controller
 	sql = "select sensor_id, room_id, sensor_type from sensor;";
 	len = strlen(sql);
-//	
+	//	
 	error = sqlite3_prepare_v2(conn, sql, len, &res, NULL);
 	assert(error == SQLITE_OK);
-//
+	//
 	while (sqlite3_step(res) == SQLITE_ROW) {
 		int room_id = sqlite3_column_int(res, 1);
 		struct room *r = room_model_find(rm, room_id);
 		assert(r);
-//		
+		//		
 		int id = sqlite3_column_int(res, 0);
 		int type = sqlite3_column_int(res, 2);
 
@@ -409,19 +409,19 @@ int room_model_load(struct room_model *rm, char *db_file)
 
 	sql = "select controller_id, room_id, controller_type from controller";
 	len = strlen(sql);
-//	
+	//	
 	error = sqlite3_prepare_v2(conn, sql, len, &res, NULL);
 	assert(error == SQLITE_OK);
-//		
+	//		
 	while (sqlite3_step(res) == SQLITE_ROW) {
 		int room_id = sqlite3_column_int(res, 1);
 		struct room *r = room_model_find(rm, room_id);
 		assert(r);
-	
+
 		int id = sqlite3_column_int(res, 0);
 		int type = sqlite3_column_int(res, 2);
 		struct controller controller;
-		
+
 		controller_init(&controller, id, type);
 		room_add_controller(r, &controller);
 		controller_destroy(&controller);

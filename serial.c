@@ -32,7 +32,7 @@ int open_serial_source(char *device)
 	newtio.c_cflag &= ~CSTOPB;
 	newtio.c_cflag &= ~CSIZE;
 	newtio.c_cflag |= CS7;
-	
+
 	newtio.c_iflag |= (INPCK | ISTRIP);
 	//newtio.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
 	//newtio.c_iflag = IGNPAR | IGNBRK;
@@ -41,14 +41,14 @@ int open_serial_source(char *device)
 
 	/* Raw output_file */
 	newtio.c_oflag = 0;
-	
+
 	if (tcflush(fd, TCIFLUSH) >= 0 && tcsetattr(fd, TCSANOW, &newtio) >= 0) {
 		printf("fd ok\n");
 		return fd;
 	}
 
 	close(fd);
-	
+
 	return -1;
 }
 
@@ -56,14 +56,14 @@ int source_read(int fd, char *buf, int count)
 {
 	fd_set fds;
 	int cnt;
-	
+
 	FD_ZERO(&fds);
 	FD_SET(fd, &fds);
 
 	cnt = select(fd+1, &fds, NULL, NULL, NULL);
 	if (cnt < 0)
 		return -1;
-	
+
 	cnt = read(fd, buf, count);
 	return cnt;
 }
@@ -71,30 +71,30 @@ int source_read(int fd, char *buf, int count)
 int source_write(int fd, const char *buf, int count)
 {
 	int actual = 0;
-/*	if (fcntl(fd, F_SETFL, 0) < 0) {
+	/*	if (fcntl(fd, F_SETFL, 0) < 0) {
 		return -1;
-	}
-*/	
-//	while (count > 0) {
-		int n = write(fd, buf, count);
-//		if (n < 0 && errno == EINTR) {
-//			continue;
-//		}
-//		if (n < 0) {
-//			actual = -1;
-//			break;
-//		}
+		}
+	 */	
+	//	while (count > 0) {
+	int n = write(fd, buf, count);
+	//		if (n < 0 && errno == EINTR) {
+	//			continue;
+	//		}
+	//		if (n < 0) {
+	//			actual = -1;
+	//			break;
+	//		}
 
-//		count -= n;
-//		actual += n;
-//		buf += n;
-//	}
+	//		count -= n;
+	//		actual += n;
+	//		buf += n;
+	//	}
 
-/*	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0) {
-		// WE ARE IN TROUBLE
+	/*	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0) {
+	// WE ARE IN TROUBLE
 	}
-*/
-//	return actual;
+	 */
+	//	return actual;
 	return n;
 }
 
@@ -122,43 +122,43 @@ char getAddressAscii(int address, char buf[4])
 {
 	int x = address * 2 + 0x1000;
 
-        int i, j, m, n;  
-        i = x / (16 * 16 * 16); 
-        j = (x / (16 * 16)) % 16; 
-        m = x - i*(16*16*16) - j*(16*16); 
-        m = m / 16; 
-        n = x % 16; 
+	int i, j, m, n;  
+	i = x / (16 * 16 * 16); 
+	j = (x / (16 * 16)) % 16; 
+	m = x - i*(16*16*16) - j*(16*16); 
+	m = m / 16; 
+	n = x % 16; 
 
-        buf[0] = getAscii(i);
-        buf[1] = getAscii(j);
-        buf[2] = getAscii(m);
-        buf[3] = getAscii(n);
+	buf[0] = getAscii(i);
+	buf[1] = getAscii(j);
+	buf[2] = getAscii(m);
+	buf[3] = getAscii(n);
 }
 
 int getReadCommandFrame (char *buf, int *sz, int address, int num)
 {
-        if (buf == NULL || sz == NULL ||  
-                        (address < 0 || address > 255) || num < 0)  
-                return -1; 
+	if (buf == NULL || sz == NULL ||  
+			(address < 0 || address > 255) || num < 0)  
+		return -1; 
 
-        buf[0] = 0x02;
-        buf[1] = '0';
-            
+	buf[0] = 0x02;
+	buf[1] = '0';
+
 	getAddressAscii(address, &buf[2]);
 
-        buf[6] = getAscii(num / 10);
-        buf[7] = getAscii(num - num/10);
-     
-        buf[8] = 0x03;
-            
-	
-        int i, sum = 0;
-        for (i = 1; i <= 8; i++)
-                sum += buf[i];
+	buf[6] = getAscii(num / 10);
+	buf[7] = getAscii(num - num/10);
 
-        i = sum&0xFF;
+	buf[8] = 0x03;
+
+
+	int i, sum = 0;
+	for (i = 1; i <= 8; i++)
+		sum += buf[i];
+
+	i = sum&0xFF;
 	buf[9]  = getAscii(i/16);
-        buf[10] = getAscii(i%16);
+	buf[10] = getAscii(i%16);
 
 	*sz = 11;
 
@@ -172,16 +172,16 @@ int getReadCommandFrame (char *buf, int *sz, int address, int num)
 int getWriteCommandFrame(char *buf, int *sz, int address, int num, char *data)
 {
 	if (buf == NULL || sz == NULL ||  
-                        (address < 0 || address > 255) || num < 0)  
-                return -1; 
+			(address < 0 || address > 255) || num < 0)  
+		return -1; 
 
-        buf[0] = 0x02;
-        buf[1] = '1';
+	buf[0] = 0x02;
+	buf[1] = '1';
 
 	getAddressAscii(address, &buf[2]);
 
 	buf[6] = getAscii(num / 10);
-        buf[7] = getAscii(num - num/10);
+	buf[7] = getAscii(num - num/10);
 
 	int i;
 	for (i = 0; i < num*2; i+=4) {
@@ -194,12 +194,12 @@ int getWriteCommandFrame(char *buf, int *sz, int address, int num, char *data)
 	buf[8+num*2] = 0x03;
 
 	int sum = 0;
-        for (i = 1; i <= 8+num*2; i++)
-                sum += buf[i];
+	for (i = 1; i <= 8+num*2; i++)
+		sum += buf[i];
 
-        i = sum&0xFF;
+	i = sum&0xFF;
 	buf[8+num*2+1]  = getAscii(i/16);
-        buf[8+num*2+2]  = getAscii(i%16);
+	buf[8+num*2+2]  = getAscii(i%16);
 
 	*sz = 8+num*2+3;
 
@@ -231,23 +231,23 @@ int test_plc_callback(void *context, char *buf, int sz)
 void *test_plc(void *param)
 {
 	ptable *table = (ptable *)param;
-	
+
 
 	while (1) {
-//		getWriteCommandFrame(cmd->buf, &cmd->sz, 123, 4, "1234ABCD");
+		//		getWriteCommandFrame(cmd->buf, &cmd->sz, 123, 4, "1234ABCD");
 		struct command *cmd = malloc(sizeof(struct command));
 		getReadCommandFrame(cmd->buf, &cmd->sz, 123, 5);
-//		sprintf(cmd->buf, 
-//			"\\\x%02X \\\x%02X \\\x%02X \\\x%02X \\\x%02X \\\x%02X \\\x%02X \\\x%02X \\\x%02X \\\x%02X \\\x%02X",
-//			0x02, 0x30, 0x31, 0x30, 0x46, 0x36, 
-//				0x30, 0x34, 0x03, 0x37, 0x34);
+		//		sprintf(cmd->buf, 
+		//			"\\\x%02X \\\x%02X \\\x%02X \\\x%02X \\\x%02X \\\x%02X \\\x%02X \\\x%02X \\\x%02X \\\x%02X \\\x%02X",
+		//			0x02, 0x30, 0x31, 0x30, 0x46, 0x36, 
+		//				0x30, 0x34, 0x03, 0x37, 0x34);
 
-//		printf("%s\n", cmd->buf);
-//		cmd->sz = strlen(cmd->buf);
-				
+		//		printf("%s\n", cmd->buf);
+		//		cmd->sz = strlen(cmd->buf);
+
 		cmd->context = NULL;
 		cmd->respCallback = test_plc_callback;
-		
+
 #define PRIORITY 1
 		put_data(table, (void *)cmd, PRIORITY);
 		sleep(1);
@@ -255,7 +255,7 @@ void *test_plc(void *param)
 	}
 	return (void *)NULL;
 }
-	
+
 //int main(int argc, char *argv[])
 //int test(int argc, char *argv[])
 //{
@@ -315,12 +315,12 @@ void *test_plc(void *param)
 
 void *thread_serial_sensor(void *arg)
 {
-        struct serial *s = (struct serial*)arg;
+	struct serial *s = (struct serial*)arg;
 
 	struct room_model *rm = s->rm;
 
-        while (s->is_available) {
-                // rand value
+	while (s->is_available) {
+		// rand value
 		int i, j;
 		for (i = 0; i < rm->n_room; i++) {
 			struct room *r = &rm->room[i];
@@ -334,7 +334,7 @@ void *thread_serial_sensor(void *arg)
 		sleep(s->read_plc_freq);
 
 		// TODO: read from real serial
-        }
+	}
 
 	return (void *)NULL;
 }
@@ -357,23 +357,23 @@ int serial_start(struct serial *s, struct room_model *rm, struct config *config)
 
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
-	
+
 	int ret = pthread_create(&s->tid_serial_sensor, &attr, thread_serial_sensor, (void *)s);
 	assert(ret == 0);
 	pthread_attr_destroy(&attr);
-	
+
 	return 0;
 }
 
 int serial_stop(struct serial *s)
 {
 	assert(s);
-	
+
 	s->is_available = 0;
 	s->rm = NULL;
 	s->read_plc_freq = -1;
 	s->serial_fd = -1;
-	
+
 	pthread_cancel(s->tid_serial_sensor);
 	pthread_join(s->tid_serial_sensor, NULL);
 

@@ -9,22 +9,22 @@ int open_socket_client(char *ip, int port)
 	int fd;
 	struct sockaddr_in serv_addr; 
 	if((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        	DEBUG("Error : Could not create socket \n");
-        	return -1;
-    	}
+		DEBUG("Error : Could not create socket \n");
+		return -1;
+	}
 	memset(&serv_addr, '0', sizeof(serv_addr)); 
 
 	serv_addr.sin_family = AF_INET;
-    	serv_addr.sin_port = htons(port); 
-	
-    	if(inet_pton(AF_INET, ip, &serv_addr.sin_addr)<=0) {
-        	DEBUG("inet_pton error occured\n");
-		close(fd);
-        	return -1;
-    	} 
+	serv_addr.sin_port = htons(port); 
 
-    	if(connect(fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-//		DEBUG("error : connect failed, %d\n", fd);
+	if(inet_pton(AF_INET, ip, &serv_addr.sin_addr)<=0) {
+		DEBUG("inet_pton error occured\n");
+		close(fd);
+		return -1;
+	} 
+
+	if(connect(fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+		//		DEBUG("error : connect failed, %d\n", fd);
 		close(fd);
 		return -1;
 	}
@@ -63,20 +63,20 @@ int safe_read(int fd, void *buffer, int n)
 	if (fd < 0) {
 		return -1;
 	}
-		
+
 	for (;;) {
 		FD_ZERO(&fds);
 		FD_SET(fd, &fds);
-		
+
 		cnt = select(fd+1, &fds, NULL, NULL, NULL);
 		if (cnt < 0) {
 			return -1;
 		}
-		
-//		int size;
-//		int ret = ioctl(fd, FIONREAD, &size);
-//		if (ret < 0) return -1;
-//		if (size == 0) continue;
+
+		//		int size;
+		//		int ret = ioctl(fd, FIONREAD, &size);
+		//		if (ret < 0) return -1;
+		//		if (size == 0) continue;
 
 		cnt = read(fd, buffer, n);
 		if (cnt != 0) {
@@ -90,7 +90,7 @@ int safe_read(int fd, void *buffer, int n)
 int safe_write(int fd, void *buffer, int count)
 {
 	int actual = 0;
-	
+
 	if (fd < 0) return -1;
 
 	while (count > 0) {
@@ -99,7 +99,7 @@ int safe_write(int fd, void *buffer, int count)
 			continue;
 		}
 
-		if (n < 0) {
+		if (n <= 0) {
 			actual = -1;
 			break;
 		}
@@ -179,10 +179,10 @@ int read_byte(int fd, struct recv *recv, char *ch)
 					sizeof(recv->buffer));
 			if (n < 0) {
 				switch (errno) {
-				case EAGAIN:
-					return -1;
-				case EINTR:
-					continue;
+					case EAGAIN:
+						return -1;
+					case EINTR:
+						continue;
 				}
 				return -1;
 			} else if (n > 0) {
@@ -209,7 +209,7 @@ int read_stream(int fd, struct recv *recv, char *dest, int sz)
 		preread = recv->bufused - recv->bufpos;
 		memcpy(dest, &recv->buffer[recv->bufpos], preread);
 		recv->bufpos = recv->bufused;
-		
+
 		left = sz - preread;
 		for (i = 0; i < left; i++) {
 			char ch;
@@ -227,7 +227,7 @@ int get_rand(int start, int end)
 	struct timeval tpstart;
 	gettimeofday(&tpstart, NULL);
 	srand(tpstart.tv_usec);
-//	srand((unsigned)(time(NULL)));
+	//	srand((unsigned)(time(NULL)));
 
 	int offsize = end - start;
 	int n = (int)(offsize*1.0*rand()/(RAND_MAX+1.0));	
@@ -274,7 +274,7 @@ ssize_t treadn(int fd, void *buf, size_t nbytes, unsigned int timeout)
 {
 	size_t nleft;
 	ssize_t nread;
-	
+
 	nleft = nbytes;
 	while (nleft > 0) {
 		if ((nread == tread(fd, buf, nleft, timeout)) < 0) {

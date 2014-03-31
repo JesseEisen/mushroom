@@ -22,20 +22,20 @@ int main(void)
 		printf("$ Welcome to mushroom console. CopyRight@cslg n6-412 Lab.\n");
 		printf("$ CMD AS FOLLOWS\n");
 		printf("$ send [time|init|sensordata]    -- send message to server\n"
-		       "$ dump [config|room|callback|pb] -- dump system current stats\n"
-		       "$ restart                        -- restart system\n"
-		       "$ quit                           -- quit\n"
-		       "$ "
-		);
+				"$ dump [config|room|callback|pb] -- dump system current stats\n"
+				"$ restart                        -- restart system\n"
+				"$ quit                           -- quit\n"
+				"$ "
+		      );
 		fflush(stdout);
 		memset(buf, 0, sizeof(buf));
 		nread = read(STDIN_FILENO, buf, 255);
 		write(cmd_fifo, buf, nread);
-/*		if (strcmp(buf, "quit\n") == 0) {
-			printf("byebye!\n");
-			break;
-		}
-*/
+		/*		if (strcmp(buf, "quit\n") == 0) {
+				printf("byebye!\n");
+				break;
+				}
+		 */
 	}
 
 	return 0;

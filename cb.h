@@ -10,9 +10,9 @@ typedef	void (*pb_init)(void *);
 typedef	size_t (*pb_get_packed_size)(const void *);
 typedef	size_t (*pb_pack)(const void *, uint8_t *out);
 typedef	void* (*pb_unpack)(
-				ProtobufCAllocator *,
-				size_t len,
-				const uint8_t *data);
+		ProtobufCAllocator *,
+		size_t len,
+		const uint8_t *data);
 typedef	void (*pb_free_unpacked)(void *, ProtobufCAllocator *);
 
 struct protobuf_message {
@@ -26,10 +26,10 @@ struct protobuf_message {
 
 int protobuf_message_init(void);
 int protobuf_message_register(char *name, pb_init init,
-						pb_get_packed_size get_packed_size,
-						pb_pack pack,
-						pb_unpack unpack,
-						pb_free_unpacked free_unpacked);
+		pb_get_packed_size get_packed_size,
+		pb_pack pack,
+		pb_unpack unpack,
+		pb_free_unpacked free_unpacked);
 struct protobuf_message* protobuf_message_find(char *name);
 void protobuf_message_dump(void);
 void protobuf_message_destroy(void);

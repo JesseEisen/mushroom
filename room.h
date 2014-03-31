@@ -27,7 +27,7 @@ struct sensor {
 	int *data;
 	int n_cache;
 	int current;
-		
+
 	int fuse;
 };
 
@@ -44,7 +44,7 @@ struct room {
 	int n_controller;
 	struct sensor *sensor;
 	int n_sensor;
-	
+
 	int n_sensor_used;
 	int n_controller_used;
 };

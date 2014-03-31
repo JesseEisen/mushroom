@@ -98,12 +98,12 @@ void log_init(char *info, char *warning, char *trace, char *err)
 		info_fp = fopen(info, "a+");
 		assert(info_fp);
 	}
-	
+
 	if (trace) {
 		trace_fp = fopen(trace, "a+");
 		assert(trace_fp);
 	}
-	
+
 	if (warning) {
 		warning_fp = fopen(warning, "a+");
 		assert(warning_fp);
@@ -121,11 +121,11 @@ void log_destroy()
 	if (info_fp) {
 		fclose(info_fp);
 	}
-	
+
 	if (trace_fp) {
 		fclose(trace_fp);
 	}
-	
+
 	if (warning_fp) {
 		fclose(warning_fp);
 	}

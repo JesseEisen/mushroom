@@ -11,14 +11,14 @@ struct socket_client {
 	ptable *msg_in;
 	ptable *msg_out;
 	int sock_fd;
-	
+
 	char ip[255];
 	int port;
 
 	pthread_t tid_recv_raw2pkt;
 	pthread_t tid_recv_pkt2msg;
 	pthread_t tid_send;
-	
+
 	pthread_t *tid_eating;
 	int n_eating;
 

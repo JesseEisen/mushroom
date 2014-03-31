@@ -27,7 +27,7 @@ void thread_cleanup(void *arg)
 void *socket_recv_raw2pkt(void *arg)
 {
 	struct socket_client *sc = (struct socket_client *)arg;
-	
+
 	DEBUG("socket_recv_raw2pkt start success...\n");	
 
 	pthread_cleanup_push(thread_cleanup, NULL);
@@ -41,6 +41,7 @@ RESTART:
 			int ret = read_byte(sc->sock_fd, &sc->recv, &ch);
 			if (ret < 0) {
 				log_err("read err\n");
+				//TODO sock_err LOCK!
 				sc->sock_err = 1;
 				goto RESTART;
 			}
@@ -49,7 +50,7 @@ RESTART:
 			}
 			i++;
 		} while (i < sizeof(Prefix)-1);
-	
+
 		char sz_buf[3];
 		for (i = 0; i < 3; i++) {
 			int ret;
@@ -63,7 +64,7 @@ RESTART:
 
 		uint32_t pkt_sz;
 		int24_decode(sz_buf, &pkt_sz);
-			
+
 		// assert MTU
 		if (pkt_sz < 0 || pkt_sz > MAX_PACKET_SIZE) {
 			log_err("package sz error, pkt_sz = %d\n", pkt_sz);
@@ -72,7 +73,7 @@ RESTART:
 
 		char *payload = malloc(pkt_sz);
 		assert(payload);
-		
+
 		int ret = read_stream(sc->sock_fd, &sc->recv, payload, pkt_sz);
 		if (ret < 0) {
 			log_err("read err\n");
@@ -89,14 +90,14 @@ RESTART:
 
 		char hexdump[8092];
 		char *p = hexdump;
-	
+
 		memset(hexdump, 0, sizeof(hexdump));
 		for (i = 0; i < pkt_in->pkt_sz; i++) {
 			snprintf(p, 3, "%02x", payload[i]);
 			p += 2;
 		}
 
-//		log_info("%s", hexdump);
+		//		log_info("%s", hexdump);
 		DEBUG("recv message: MUSHROOM|%d|%s\n\n", pkt_sz, hexdump);
 
 		put_data(sc->raw_in, (void *)pkt_in, 1 /* PRIORITY */);
@@ -171,9 +172,9 @@ void *socket_send(void *arg)
 	assert(arg);
 
 	struct socket_client *sc = (struct socket_client *)arg;
-	
+
 	DEBUG("Thread socket_send start success..\n");
-	
+
 	struct packet *pkt_out;
 
 RESTART:
@@ -190,7 +191,7 @@ RESTART:
 			free(pkt_out);
 			goto RESTART;
 		}
-			
+
 		char sz_buf[3];
 		int24_encode(pkt_out->pkt_sz, sz_buf);
 		//DEBUG("**********************send pkt_sz:%d, buf: [0]:%x, [1]:%x, [2]:%x************************************\n", pkt_out->pkt_sz, sz_buf[0], sz_buf[1], sz_buf[2]);	
@@ -202,7 +203,7 @@ RESTART:
 			free(pkt_out);
 			goto RESTART;
 		}
-		
+
 		ret = safe_write(sc->sock_fd, pkt_out->payload, pkt_out->pkt_sz);
 		if (ret < 0) {
 			log_err("safe write error\n");
@@ -215,7 +216,7 @@ RESTART:
 
 		char hexdump[8092];
 		char *p = hexdump;
-	
+
 		memset(hexdump, 0, sizeof(hexdump));
 		int i;
 		for (i = 0; i < pkt_out->pkt_sz; i++) {
@@ -223,13 +224,13 @@ RESTART:
 			p += 2;
 		}
 
-//		log_info("%s", hexdump);
+		//		log_info("%s", hexdump);
 		DEBUG("send message:MUSHROOM|%d|%s\n\n", pkt_out->pkt_sz, hexdump);
 
 		free(pkt_out->payload);
 		free(pkt_out);
 	}
-		
+
 	return (void *)NULL;
 }
 
@@ -254,11 +255,11 @@ void *socket_eating(void *arg)
 			for (i = 0; i < msg->sz; i++) {
 				printf("%c", msg->msg[i]);
 			}
-			
+
 			printf("\n");
 			goto CLEAN;
 		}
-			
+
 		struct callback *cbe = callback_find(header->message_id);
 		if (cbe == NULL) {
 			log_err("message_id:%d, service not find.\n", header->message_id);
@@ -282,7 +283,7 @@ CLEAN:
 	}
 
 	pthread_cleanup_pop(0);
-	
+
 	return (void *)NULL;	
 }
 
@@ -293,7 +294,6 @@ void *socket_watchdog(void *arg)
 	int flag = 0;
 
 	while (sc->is_available) {
-		sleep(1);
 		if (sc->sock_err) {
 			if (flag == 0) {
 				log_err("socket error, now retry\n");
@@ -377,10 +377,10 @@ int socket_client_start(struct socket_client *sc, char *ip, int port, int n_eati
 	memset(&sc->recv, 0, sizeof(struct recv));
 
 	pthread_attr_t attr;
-	
+
 	pthread_attr_init(&attr);
-//	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-		
+	//	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
 	int ret = pthread_create(&sc->tid_recv_raw2pkt, &attr, socket_recv_raw2pkt, (void *)sc);
 	assert(ret == 0);
 
@@ -394,13 +394,13 @@ int socket_client_start(struct socket_client *sc, char *ip, int port, int n_eati
 	sc->tid_eating = malloc(sizeof(pthread_t)*sc->n_eating);
 	ret = pthread_create(&sc->tid_eating[0], &attr, socket_eating, (void *)sc);
 	assert(ret == 0);
-	
-// TODO: multi eating thread for test
-//	sc->n_eating = n_eating;
-//	int i;
-//	for (i = 0; i < n_eating; i++) {
-//		pthread_create(sc->tid_eating, &attr, socket_eating, (void *)sc);
-//	}
+
+	// TODO: multi eating thread for test
+	//	sc->n_eating = n_eating;
+	//	int i;
+	//	for (i = 0; i < n_eating; i++) {
+	//		pthread_create(sc->tid_eating, &attr, socket_eating, (void *)sc);
+	//	}
 
 	ret = pthread_create(&sc->tid_watchdog,         &attr, socket_watchdog,         (void *)sc);
 	assert(ret == 0);
@@ -414,12 +414,12 @@ int socket_client_stop (struct socket_client *sc)
 	// 1. cancel all thread	
 	assert(sc);
 	sc->is_available = 0;
-	
+
 	pthread_cancel(sc->tid_recv_raw2pkt);
 	pthread_cancel(sc->tid_recv_pkt2msg);
 	pthread_cancel(sc->tid_send);
 	pthread_cancel(sc->tid_watchdog);
-	
+
 	int i;
 	for (i = 0; i < sc->n_eating; i++) {
 		pthread_cancel(sc->tid_eating[i]);
@@ -446,7 +446,7 @@ int socket_client_stop (struct socket_client *sc)
 	// 3. close fd
 	if (sc->sock_fd > 0)
 		close(sc->sock_fd);
-	
+
 	sc->sock_err = 1;
 
 	return 0;
@@ -455,7 +455,7 @@ int socket_client_stop (struct socket_client *sc)
 int send_message(struct socket_client *sc, MessageHeader *header, void *msg, uint32_t sz)
 {
 	assert(sc);
-	
+
 	if (header == NULL) {
 		log_err("message header error\n");
 		return -1;
@@ -487,7 +487,7 @@ int send_message(struct socket_client *sc, MessageHeader *header, void *msg, uin
 	}
 
 	uint32_t pkt_sz = 3 + header_sz + sz;		
-	
+
 	struct packet *pkt_out = malloc(sizeof(struct packet));
 	assert(pkt_out);
 
@@ -496,7 +496,7 @@ int send_message(struct socket_client *sc, MessageHeader *header, void *msg, uin
 
 	// len
 	int24_encode(header_sz, pkt_out->payload);
-	
+
 	// header
 	int ret = message_header__pack(header, pkt_out->payload+3);
 	if (ret < 0) {

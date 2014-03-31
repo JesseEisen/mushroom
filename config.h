@@ -28,17 +28,17 @@ struct config {
 	int debug_warning;
 	int debug_trace;
 	int debug_err;
-	
+
 	char remote_ip[255];
 	int remote_port;
-	
+
 	char serial_path[255];
 	char db_path[255];
 	char log_info_path[255];
 	char log_warning_path[255];
 	char log_trace_path[255];
 	char log_err_path[255];
-	
+
 	int heartbeat;
 	int time_sync_freq;
 	int read_plc_freq;

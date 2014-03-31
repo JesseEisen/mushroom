@@ -9,7 +9,7 @@
 	int NAME(struct socket_client *sc, void *ud, MessageHeader *header, void *msg, int sz)
 
 #define CALLBACK_ENTRY(NAME) \
-	{MESSAGE_ID(NAME), NULL, NAME}
+{MESSAGE_ID(NAME), NULL, NAME}
 
 #define MESSAGE_ID(NAME) \
 	MESSAGE__ID__##NAME
@@ -40,33 +40,33 @@ int message_header_copy(MessageHeader *h1_src, MessageHeader *h2_dst)
 {
 	assert(h1_src);
 	assert(h2_dst);
-	
+
 	h2_dst->message_id = h1_src->message_id;
 
 	DEBUG("h1_src: %d, %d, %d, %d\n", h1_src->has_session, h1_src->has_version, h1_src->has_connection, h1_src->has_source);
 	DEBUG("h1_src: session:%d, version:%d, connection:%d, source:%d\n",
-		h1_src->session, h1_src->version, h1_src->connection, h1_src->source);
-	
+			h1_src->session, h1_src->version, h1_src->connection, h1_src->source);
+
 	if (h1_src->has_session) {
 		h2_dst->has_session = 1;
 		h2_dst->session = h1_src->session;
 	}
-	
+
 	if (h1_src->has_type) {
 		h2_dst->has_type = 1;
 		h2_dst->type = h1_src->type;
 	}
-	
+
 	if (h1_src->has_version) {
 		h2_dst->has_version = 1;
 		h2_dst->version = h1_src->version;
 	}
-	
+
 	if (h1_src->has_connection) {
 		h2_dst->has_connection = 1;
 		h2_dst->connection = h1_src->connection;
 	}
-	
+
 	if (h1_src->has_source) {
 		h2_dst->has_source = 1;
 		h2_dst->source = h1_src->source;
@@ -83,77 +83,77 @@ int protobuf_message_init(void)
 	n_pb_entry = 0;
 
 	PROTOBUF_MESSAGE_REGISTER("Room", room_init, 
-						room__get_packed_size,
-						room__pack,
-						room__unpack,
-						room__free_unpacked);
+			room__get_packed_size,
+			room__pack,
+			room__unpack,
+			room__free_unpacked);
 	PROTOBUF_MESSAGE_REGISTER("Sensor", sensor__init,
-						sensor__get_packed_size,
-						sensor__pack,
-						sensor__unpack,
-						sensor__free_unpacked);
+			sensor__get_packed_size,
+			sensor__pack,
+			sensor__unpack,
+			sensor__free_unpacked);
 
 	PROTOBUF_MESSAGE_REGISTER("SynTime", syn_time__init,
-						syn_time__get_packed_size,
-						syn_time__pack,
-						syn_time__unpack,
-						syn_time__free_unpacked);
+			syn_time__get_packed_size,
+			syn_time__pack,
+			syn_time__unpack,
+			syn_time__free_unpacked);
 
 	PROTOBUF_MESSAGE_REGISTER("ResponseCode", response_code__init,
-							response_code__get_packed_size,
-							response_code__pack,
-							response_code__unpack,
-							response_code__free_unpacked);
+			response_code__get_packed_size,
+			response_code__pack,
+			response_code__unpack,
+			response_code__free_unpacked);
 	PROTOBUF_MESSAGE_REGISTER("Config", config__init,
-						config__get_packed_size,
-						config__pack,
-						config__unpack,
-						config__free_unpacked);
+			config__get_packed_size,
+			config__pack,
+			config__unpack,
+			config__free_unpacked);
 
 	PROTOBUF_MESSAGE_REGISTER("ConfigList", config_list__init,
-							config_list__get_packed_size,
-							config_list__pack,
-							config_list__unpack,
-							config_list__free_unpacked);
+			config_list__get_packed_size,
+			config_list__pack,
+			config_list__unpack,
+			config_list__free_unpacked);
 
 	PROTOBUF_MESSAGE_REGISTER("Controller", controller__init,
-							controller__get_packed_size,
-							controller__pack,
-							controller__unpack,
-							controller__free_unpacked);
+			controller__get_packed_size,
+			controller__pack,
+			controller__unpack,
+			controller__free_unpacked);
 
 	PROTOBUF_MESSAGE_REGISTER("SensorData", sensor_data__init,
-							sensor_data__get_packed_size,
-							sensor_data__pack,
-							sensor_data__unpack,
-							sensor_data__free_unpacked);
+			sensor_data__get_packed_size,
+			sensor_data__pack,
+			sensor_data__unpack,
+			sensor_data__free_unpacked);
 
 	PROTOBUF_MESSAGE_REGISTER("Ping", ping__init,
-						ping__get_packed_size,
-						ping__pack,
-						ping__unpack,
-						ping__free_unpacked);
+			ping__get_packed_size,
+			ping__pack,
+			ping__unpack,
+			ping__free_unpacked);
 
 	PROTOBUF_MESSAGE_REGISTER("RoomConf", room_conf__init,
-						room_conf__get_packed_size,
-						room_conf__pack,
-						room_conf__unpack,
-						room_conf__free_unpacked);
+			room_conf__get_packed_size,
+			room_conf__pack,
+			room_conf__unpack,
+			room_conf__free_unpacked);
 
 	PROTOBUF_MESSAGE_REGISTER("Init", init__init,
-						init__get_packed_size,
-						init__pack,
-						init__unpack,
-						init__free_unpacked);
-	
+			init__get_packed_size,
+			init__pack,
+			init__unpack,
+			init__free_unpacked);
+
 	return 0;
 }
 
 int protobuf_message_register(char *name, pb_init init,
-						pb_get_packed_size get_packed_size,
-						pb_pack pack,
-						pb_unpack unpack,
-						pb_free_unpacked free_unpacked)
+		pb_get_packed_size get_packed_size,
+		pb_pack pack,
+		pb_unpack unpack,
+		pb_free_unpacked free_unpacked)
 {
 	if (name == NULL) {
 		log_err("name error\n");
@@ -188,9 +188,9 @@ struct protobuf_message* protobuf_message_find(char *name)
 		log_err("name error\n");
 		return NULL;
 	}
-	
+
 	pthread_mutex_lock(&lock_pb_entry);
-	
+
 	int i;
 	for (i = 0; i < n_pb_entry; i++) {
 		struct protobuf_message *pbe = &pb_entry[i];
@@ -201,18 +201,18 @@ struct protobuf_message* protobuf_message_find(char *name)
 	}
 
 	pthread_mutex_unlock(&lock_pb_entry);
-		
+
 	return NULL;
 }
 
 void protobuf_message_dump(void)
 {
 	int i;
-	
+
 	for (i = 0; i < n_pb_entry; i++) {
 		struct protobuf_message *pbe = protobuf_message_find(pb_entry[i].name);	
 		DEBUG("pbe: name:%s, init:%p, get_packed_size:%p, pack:%p, unpack:%p, free_unpacked:%p\n",
-			pbe->name, pbe->init, pbe->get_packed_size, pbe->pack, pbe->unpack, pbe->free_unpacked);
+				pbe->name, pbe->init, pbe->get_packed_size, pbe->pack, pbe->unpack, pbe->free_unpacked);
 	}
 
 }
@@ -238,7 +238,7 @@ int callback_register(int message_id, void *ud, int ud_option, MessageCallback c
 		log_err("too many callback!\n");
 		exit(1);
 	}
-	
+
 	if (ud == NULL) {
 		cbe->ud_option = -1;
 	} else {
@@ -281,7 +281,7 @@ struct callback *callback_find(int message_id)
 	pthread_mutex_lock(&lock_cb_entry);
 
 	int i;
-	
+
 	for (i = 0; i < n_cb_entry; i++) {
 		if (cb_entry[i].message_id == message_id) {
 			pthread_mutex_unlock(&lock_cb_entry);
@@ -331,7 +331,7 @@ int callback_del_userdata(int message_id)
 		log_err("do not find callback\n");
 		return -1;
 	}
-	
+
 	pthread_mutex_lock(&lock_cb_entry);
 
 	if (cbe->ud == NULL) {
@@ -358,7 +358,7 @@ int callback_del_userdata(int message_id)
 void callback_dump(void)
 {
 	int i;
-	
+
 	for (i = 0; i < n_cb_entry; i++) {
 		DEBUG("callback_find:message_id:%d\n", cb_entry[i].message_id);
 		struct callback *cbe = callback_find(cb_entry[i].message_id);	
@@ -367,7 +367,7 @@ void callback_dump(void)
 			return;
 		}
 		DEBUG("callback message_id = %d, ud = %p, cb = %p, ud_option = %d\n", 
-						cbe->message_id, cbe->ud, cbe->cb, cbe->ud_option);
+				cbe->message_id, cbe->ud, cbe->cb, cbe->ud_option);
 	}
 }
 
@@ -375,7 +375,7 @@ void callback_destroy(void)
 {
 	assert(cb_entry);
 	assert(n_cb_entry > 0);
-	
+
 	int i;
 	for (i = 0; i < n_cb_entry; i++) {
 		int message_id = cb_entry[i].message_id;
@@ -396,7 +396,7 @@ int pb_message_pack(void *pb, struct protobuf_message *opt, char **msg, int *sz)
 
 	*sz = opt->get_packed_size(pb);
 	*msg = malloc(*sz);
-	
+
 	if (opt->pack(pb, *msg) < 0) {
 		log_err("msg pack error\n");
 		return -1;
@@ -433,7 +433,7 @@ CALLBACK(READ_TIME_RESPONSE)
 	}
 
 	st_opt->free_unpacked(st_req, NULL);
-	
+
 	return 0;
 }
 
@@ -474,9 +474,9 @@ CALLBACK(UPDATE_TIME)
 	}
 
 	DEBUG("[CALLBACK:%d] received a update time message, set time:%s\n", header->message_id, st_req->timestamp);
-	
+
 	st_opt->free_unpacked(st_req, NULL);
-	
+
 
 	MessageHeader header_resp = MESSAGE_HEADER__INIT;
 	message_header_copy(header, &header_resp);
@@ -485,7 +485,7 @@ CALLBACK(UPDATE_TIME)
 	ResponseCode respcode_resp = RESPONSE_CODE__INIT;
 	respcode_resp.code = RESPONSE__OK;
 	respcode_resp.log = "Hello, Set Time Success";
-		
+
 	struct protobuf_message *r_opt = protobuf_message_find("ResponseCode");	
 	assert(r_opt);
 
@@ -494,9 +494,9 @@ CALLBACK(UPDATE_TIME)
 
 	pb_message_pack(&respcode_resp, r_opt, &msg_resp, &sz_resp);
 	send_message(sc, &header_resp, msg_resp, sz_resp);
-	
+
 	free(msg_resp);
-	
+
 	return 0;
 }
 
@@ -536,12 +536,12 @@ CALLBACK(READ_CONTROLLER_STATE)
 	if (sz < 0 || msg == NULL) return -1;
 	if (ud == NULL) return -1;
 	if (sc == NULL) return -1;
-	
+
 	DEBUG("[CALLBACK:%d] received a read controller state message\n", header->message_id);
 	struct room_model *rm = ud;
 	struct protobuf_message *c_opt = protobuf_message_find("Controller");
 	assert(c_opt);
-	
+
 	Controller *c_req = c_opt->unpack(NULL, sz, msg);
 	if (c_req == NULL) {
 		log_err("controller__unpack error\n");
@@ -605,7 +605,7 @@ CALLBACK(UPDATE_CONTROLLER_STATE)
 		log_err("do not find this controller:%d\n", c_req->controller_id);
 		return -1;
 	}
-		
+
 	if (c_req->has_state == 0) {
 		log_err("request do not has state param\n");
 		c_opt->free_unpacked(c_req, NULL);
@@ -615,7 +615,7 @@ CALLBACK(UPDATE_CONTROLLER_STATE)
 	DEBUG("c_req:%d\n", c_req->state);
 	// change state!!! here
 	c_dev->state = c_req->state;
-//	// TODO: send command to PLC!
+	//	// TODO: send command to PLC!
 
 	c_opt->free_unpacked(c_req, NULL);
 
@@ -629,13 +629,13 @@ CALLBACK(UPDATE_CONTROLLER_STATE)
 
 	struct protobuf_message *r_opt = protobuf_message_find("ResponseCode");	
 	assert(r_opt);
-	
+
 	char *msg_resp;
 	int sz_resp;
 
 	pb_message_pack(&respcode_resp, r_opt, &msg_resp, &sz_resp);
 	send_message(sc, &header_resp, msg_resp, sz_resp);
-	
+
 	free(msg_resp);
 	return 0;
 }
@@ -648,15 +648,15 @@ CALLBACK(UPDATE_CONTROLLER_STATE)
 CALLBACK(READ_SENSOR_DATA)
 {
 	DEBUG("[CALLBACK:%d] received a read_sensor_data message\n", header->message_id);
-//	Sensor *sreq = sensor__unpack(NULL, sz, msg);
-//	if (sreq == NULL) {
-//		log_err("unpack msg error\n");
-//		return -1;
-//	}
+	//	Sensor *sreq = sensor__unpack(NULL, sz, msg);
+	//	if (sreq == NULL) {
+	//		log_err("unpack msg error\n");
+	//		return -1;
+	//	}
 
 
-//	TODO: send request to thread_sensor, and recaculate sensor data
-//	TODO: reconfirm this command return back a single sensor data or a whole room sensor data
+	//	TODO: send request to thread_sensor, and recaculate sensor data
+	//	TODO: reconfirm this command return back a single sensor data or a whole room sensor data
 	return 0;
 }
 
@@ -684,7 +684,7 @@ CALLBACK(PING)
 
 	struct ping_stats *p_stats = ud;
 	assert(p_stats);
-	
+
 	p_stats->received++;
 
 	struct protobuf_message *ping_opt = protobuf_message_find("Ping");
@@ -697,7 +697,7 @@ CALLBACK(PING)
 	}
 
 	DEBUG("[CALLBACK:%d] received a ping message, stats:%d, src:%s, say:%s\n",
-			 header->message_id, p_stats->received, ping_req->src, ping_req->echo);
+			header->message_id, p_stats->received, ping_req->src, ping_req->echo);
 
 	ping_opt->free_unpacked(ping_req, NULL);
 
@@ -731,10 +731,10 @@ int send_room_sensor_data(struct socket_client *sc, struct room_model *rm, int r
 	DEBUG("sending room[%d] sensordata message to server\n", room_id);
 	struct protobuf_message *sd_opt = protobuf_message_find("SensorData");
 	assert(sd_opt);
-	
+
 	struct protobuf_message *s_opt = protobuf_message_find("Sensor");
 	assert(s_opt);
-	
+
 	struct protobuf_message *t_opt = protobuf_message_find("SynTime");
 	assert(t_opt);
 
@@ -799,7 +799,7 @@ int send_init_configure(struct socket_client *sc, struct room_model *rm, struct 
 	assert(sc);
 	assert(rm);
 	assert(config);
-	
+
 	DEBUG("sending init configure message to server\n");
 	struct protobuf_message *init_opt = protobuf_message_find("Init");
 	if (init_opt == NULL) {
@@ -832,7 +832,7 @@ int send_init_configure(struct socket_client *sc, struct room_model *rm, struct 
 	RoomConf *tr = malloc(sizeof(RoomConf)*rm->n_room);
 	assert(init_msg.roomconf);
 	assert(tr);
-	
+
 	struct room *room = rm->room;
 
 	int i, j;
@@ -846,7 +846,7 @@ int send_init_configure(struct socket_client *sc, struct room_model *rm, struct 
 		tr[i].controller = malloc(sizeof(Controller *)*tr[i].n_controller);
 		assert(tr[i].sensor);
 		assert(tr[i].controller);
-	
+
 		// 1.1.1 roomconf->sensor
 		Sensor *ts = malloc(sizeof(Sensor)*tr[i].n_sensor);
 		assert(ts);
@@ -859,7 +859,7 @@ int send_init_configure(struct socket_client *sc, struct room_model *rm, struct 
 			ts[j].type = s->type;
 			tr[i].sensor[j] = &ts[j];
 		}
-		
+
 		// 1.1.2 roomconf->controller
 		Controller *tc = malloc(sizeof(Controller)*tr[i].n_controller);
 		assert(tc);
@@ -885,7 +885,7 @@ int send_init_configure(struct socket_client *sc, struct room_model *rm, struct 
 	char *msg;
 	pb_message_pack(&init_msg, init_opt, &msg, &sz);
 	send_message(sc, &header, msg, sz);
-	
+
 	free(msg);
 
 	// 3. free something
@@ -896,7 +896,7 @@ int send_init_configure(struct socket_client *sc, struct room_model *rm, struct 
 		if (r->controller[0]) free(r->controller[0]); r->controller[0] = NULL;
 		if (r->controller) free(r->controller);    r->controller = NULL;
 	}
-	
+
 	if (init_msg.roomconf[0]) free(init_msg.roomconf[0]); init_msg.roomconf[0] = NULL;
 	if (init_msg.roomconf) free(init_msg.roomconf);    init_msg.roomconf = NULL;	
 
