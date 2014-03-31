@@ -10,6 +10,7 @@
 #include "serial.h"
 
 static int restart = 0;
+pthread_t tid_sensor_push;
 
 int readCmdLine(struct socket_client *sc, struct room_model *rm, struct config *config)
 {
@@ -182,12 +183,11 @@ void *thread_sensor_data_push(void *arg)
 //int sensor_push_start(struct socket_client *sc, struct room_model *rm, struct config *config)
 int sensor_push_start(struct sensor_data_push *sdp)
 {
-	pthread_t tid_sensor_push;
 
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+//	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
 	pthread_create(&tid_sensor_push, &attr, thread_sensor_data_push, (void *)sdp);
 
@@ -253,10 +253,6 @@ RESTART:
 	sensor_push_start(&sdp);
 
 	readCmdLine(&socket_client, &room_model, &config);
-	if (restart == 1) {
-		restart = 0;
-		goto RESTART;
-	}
 
 	serial_stop(&serial);
 	socket_client_stop(&socket_client);
@@ -264,6 +260,13 @@ RESTART:
 	callback_destroy();
 	protobuf_message_destroy();
 	log_destroy();
+	pthread_cancel(tid_sensor_push);
+	pthread_join(tid_sensor_push, NULL);
+	
+	if (restart == 1) {
+		restart = 0;
+		goto RESTART;
+	}
 
 	DEBUG("byebye!\n");
 
