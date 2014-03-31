@@ -38,6 +38,7 @@ RESTART:
 		int i = 0;
 		char ch;
 		do {
+			DEBUG("...\n");
 			int ret = read_byte(sc->sock_fd, &sc->recv, &ch);
 			if (ret < 0) {
 				log_err("read err\n");
@@ -117,6 +118,7 @@ void *socket_recv_pkt2msg(void *arg)
 
 	pthread_cleanup_push(thread_cleanup, NULL);
 	while(sc->is_available) {
+		DEBUG("...\n");
 		struct packet *pkt_in = get_data(sc->raw_in, NULL);
 		//DEBUG("get out address:%p\n", pkt_in);
 		assert(pkt_in);
@@ -179,6 +181,7 @@ void *socket_send(void *arg)
 
 RESTART:
 	while (sc->is_available) {
+		DEBUG("...\n");
 		socket_client_wait_ready(sc);
 		pkt_out = get_data(sc->raw_out, NULL);
 		assert(pkt_out);
@@ -242,6 +245,7 @@ void *socket_eating(void *arg)
 	pthread_cleanup_push(thread_cleanup, NULL);
 
 	while (sc->is_available) {
+		DEBUG("...\n");
 		struct Message *msg = get_data(sc->msg_in, NULL);
 		assert(msg);
 
@@ -294,6 +298,7 @@ void *socket_watchdog(void *arg)
 	int flag = 0;
 
 	while (sc->is_available) {
+		usleep(1000000);
 		if (sc->sock_err) {
 			if (flag == 0) {
 				log_err("socket error, now retry\n");
@@ -306,7 +311,7 @@ void *socket_watchdog(void *arg)
 			sc->sock_fd = -1;
 			sc->sock_fd = open_socket_client(sc->ip, sc->port);
 			if (sc->sock_fd < 0) {
-				usleep(1000000); // delay some time
+			//	usleep(1000000); // delay some time
 				continue;
 			}
 			sc->sock_err = 0;

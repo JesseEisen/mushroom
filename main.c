@@ -167,6 +167,7 @@ void *thread_sensor_data_push(void *arg)
 	DEBUG("n_room:%d\n", rm->n_room);
 
 	while (1) {
+		DEBUG("...\n");
 		int i, j;
 		for (i = 0; i < rm->n_room; i++) {
 			send_room_sensor_data(sc, rm, i);
