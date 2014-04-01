@@ -321,6 +321,7 @@ void *thread_serial_sensor(void *arg)
 
 	while (s->is_available) {
 		// rand value
+		DEBUG("...\n");
 		int i, j;
 		for (i = 0; i < rm->n_room; i++) {
 			struct room *r = &rm->room[i];
@@ -347,6 +348,7 @@ int serial_start(struct serial *s, struct room_model *rm, struct config *config)
 	assert(config);
 
 	memset(s, 0, sizeof(struct serial));
+	DEBUG("...\n");
 
 	// TODO:
 	s->serial_fd = -1;
@@ -359,6 +361,7 @@ int serial_start(struct serial *s, struct room_model *rm, struct config *config)
 	pthread_attr_init(&attr);
 
 	int ret = pthread_create(&s->tid_serial_sensor, &attr, thread_serial_sensor, (void *)s);
+	DEBUG("...\n");
 	assert(ret == 0);
 	pthread_attr_destroy(&attr);
 

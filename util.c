@@ -23,11 +23,13 @@ int open_socket_client(char *ip, int port)
 		return -1;
 	} 
 
+	DEBUG("...\n");
 	if(connect(fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
 		//		DEBUG("error : connect failed, %d\n", fd);
 		close(fd);
 		return -1;
 	}
+	DEBUG("...\n");
 
 	return fd;
 }

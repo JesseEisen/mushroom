@@ -73,7 +73,6 @@ int readCmdLine(struct socket_client *sc, struct room_model *rm, struct config *
 			//			DEBUG("fd closed\n");
 		}		
 
-		usleep(200000);
 	}
 
 	close(cmd_fifo);
@@ -239,11 +238,13 @@ RESTART:
 			SOCKET_CLIENT_EATING_THREAD_NUM);	
 	test_socket_client(&socket_client);
 
+	DEBUG("...\n");
 	// 1. send init message
 	send_init_configure(&socket_client, &room_model, &config);
 
 	// 2. send read_time
 	send_read_time_request(&socket_client);
+	DEBUG("...\n");
 
 	// 3. start sensor_push
 	struct sensor_data_push sdp;
@@ -251,6 +252,7 @@ RESTART:
 	sdp.rm = &room_model;
 	sdp.sensor_data_push_freq = config.sensor_data_push_freq;
 	sensor_push_start(&sdp);
+	DEBUG("...\n");
 
 	readCmdLine(&socket_client, &room_model, &config);
 

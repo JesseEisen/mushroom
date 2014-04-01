@@ -1,4 +1,3 @@
-
 message MessageHeader
 {
     required int32 message_id = 1;

@@ -333,6 +333,7 @@ int socket_client_start(struct socket_client *sc, char *ip, int port, int n_eati
 	sprintf(sc->ip, "%s", ip);
 	sc->port = port;	
 
+	DEBUG("...\n");
 	sc->sock_fd = open_socket_client(ip, port);	
 	if (sc->sock_fd < 0) {
 		sc->sock_err = 1;
@@ -384,17 +385,21 @@ int socket_client_start(struct socket_client *sc, char *ip, int port, int n_eati
 	pthread_attr_t attr;
 
 	pthread_attr_init(&attr);
+	DEBUG("...\n");
 	//	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
 	int ret = pthread_create(&sc->tid_recv_raw2pkt, &attr, socket_recv_raw2pkt, (void *)sc);
 	assert(ret == 0);
 
+	DEBUG("...\n");
 	ret = pthread_create(&sc->tid_recv_pkt2msg, &attr, socket_recv_pkt2msg, (void *)sc);
 	assert(ret == 0);
 
+	DEBUG("...\n");
 	ret = pthread_create(&sc->tid_send,         &attr, socket_send,         (void *)sc);
 	assert(ret == 0);
 
+	DEBUG("...\n");
 	sc->n_eating = 1;
 	sc->tid_eating = malloc(sizeof(pthread_t)*sc->n_eating);
 	ret = pthread_create(&sc->tid_eating[0], &attr, socket_eating, (void *)sc);
@@ -407,6 +412,7 @@ int socket_client_start(struct socket_client *sc, char *ip, int port, int n_eati
 	//		pthread_create(sc->tid_eating, &attr, socket_eating, (void *)sc);
 	//	}
 
+	DEBUG("...\n");
 	ret = pthread_create(&sc->tid_watchdog,         &attr, socket_watchdog,         (void *)sc);
 	assert(ret == 0);
 
