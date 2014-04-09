@@ -19,3 +19,20 @@
 	./configure (交叉编译: ./configure )
 	make (安装： make install  清除: make clean 删除configure设置: make distclean)
 ```
+
+运行：
+
+由于配置文件中日志在log目录下， 因此必须手动先创建log目录， 另外由于控制台命令是通过管道来传输的， 因此cmd.fifo也要创建一下， 这些目前并不是必须的， 会慢慢移除。
+
+```
+	mkfifo cmd.fifo
+	mkdir -p log
+	./mushroom
+```
+
+有一个控制台程序， 叫做mrconsole.c需要自己编译， 可以向mushroom程序发送命令。
+
+```
+gcc mrconsole.c -o mrconsole
+./mrconsole
+```
