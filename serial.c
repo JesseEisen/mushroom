@@ -310,7 +310,7 @@ void *test_plc(void *param)
 
 #include "util.h"
 #include "room.h"
-#include "config.h"
+#include "iniconfig.h"
 #include "serial.h"
 
 void *thread_serial_sensor(void *arg)

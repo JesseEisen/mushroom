@@ -1,6 +1,6 @@
 #include "base.h"
 #include "log.h"
-#include "config.h"
+#include "iniconfig.h"
 #include "room.h"
 #include "socket_client.h"
 #include "cb.h"

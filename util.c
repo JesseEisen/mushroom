@@ -24,11 +24,15 @@ int open_socket_client(char *ip, int port)
 	} 
 
 	DEBUG("...\n");
+	// set nonblocking
+	// select fd 1
+	// connect
 	if(connect(fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
 		//		DEBUG("error : connect failed, %d\n", fd);
 		close(fd);
 		return -1;
 	}
+	// set blocking
 	DEBUG("...\n");
 
 	return fd;

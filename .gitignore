@@ -16,3 +16,16 @@ Thumbs.db
 build/*
 build/
 *.pb
+missing
+config.status
+configure
+depcomp
+install-sh
+Makefile.in
+Makefile
+autom4te.cache/
+autom4te.cache/*
+config.log
+aclocal.m4
+.deps/
+.deps/*

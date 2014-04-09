@@ -1,5 +1,5 @@
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
+#ifndef _INI_CONFIG_H_
+#define _INI_CONFIG_H_
 
 #define DEAMON 0
 #define DEBUG_INFO 1

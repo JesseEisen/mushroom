@@ -1,5 +1,5 @@
 #include "base.h"
-#include "config.h"
+#include "iniconfig.h"
 #include "iniparser/src/iniparser.h"
 
 int config_load(char *ini_file, struct config *config)
