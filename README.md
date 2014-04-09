@@ -7,12 +7,12 @@
 
 两种方法：
 
-方法一:
-	老的Makefile.bak暂时还是可以编译的， 里面可以修改编译器CC， 具体查看Makefile.bak
-	make -f Makefile.bak
+1. 方法一:
+>>	老的Makefile.bak暂时还是可以编译的， 里面可以修改编译器CC， 具体查看Makefile.bak
+>>	make -f Makefile.bak
 
-方法二:
-	使用autoconf和automake， 系统必须要安装有相应的工具
-	./autogen.sh
-	./configure (交叉编译: ./configure )
-	make (安装： make install  清除: make clean 删除configure设置: make distclean)
+2. 方法二:
+>>	使用autoconf和automake， 系统必须要安装有相应的工具
+>>	./autogen.sh
+>>	./configure (交叉编译: ./configure )
+>>	make (安装： make install  清除: make clean 删除configure设置: make distclean)
