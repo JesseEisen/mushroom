@@ -12,4 +12,4 @@
 
 7. callback里面有一个ud字段， 专门用来放置callback本身的数据， 现在的使用方法是在callback第一次被调用的时候会初始化一个ud（如果需要的话）， 具体的代码可以看一下CALLBACK(PING)的实现， 但是注意一旦数据配分配， 除非系统退出， ud是不会有生存期管理的， 这个大大简化了设计， 对本次项目来说我觉得可以接受， 但这是一个注意点， 目前没有打算修改。
 
-8. 初始化的时候要注意将log_init先启动， 然后启动callback_init以及protobuf_message_init， 这些是系统的基础设施， 必须先启动。
+8. 初始化的时候要注意将log_init先启动， 然后启动callback_init以及protobuf_message_init， 这些是系统的基础设施必须先启动。
