@@ -227,8 +227,8 @@ RESTART:
 
 	printf("ud_1:%p, ud_2:%p\n", cb1->ud, cb2->ud);
 
-	struct serial serial;
-	serial_start(&serial, &room_model, &config);
+	struct serialsosurce ss;
+	serial_start(&ss);
 
 	struct socket_client socket_client;
 #define SOCKET_CLIENT_EATING_THREAD_NUM 1
@@ -256,7 +256,7 @@ RESTART:
 
 	readCmdLine(&socket_client, &room_model, &config);
 
-	serial_stop(&serial);
+	serial_stop(&ss);
 	socket_client_stop(&socket_client);
 	room_model_destroy(&room_model);
 	callback_destroy();
