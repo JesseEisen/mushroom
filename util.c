@@ -1,106 +1,22 @@
-#include "base.h"
-#include <termios.h>
-#include <unistd.h>
 #include "util.h"
-#include <sys/ioctl.h>
 
-int open_socket_client(char *ip, int port)
-{
-	int fd;
-	struct sockaddr_in serv_addr; 
-	if((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		DEBUG("Error : Could not create socket \n");
-		return -1;
-	}
-	memset(&serv_addr, '0', sizeof(serv_addr)); 
+#include <stdio.h>
+#include <stdlib.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
 
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_port = htons(port); 
-
-	if(inet_pton(AF_INET, ip, &serv_addr.sin_addr)<=0) {
-		DEBUG("inet_pton error occured\n");
-		close(fd);
-		return -1;
-	} 
-
-	DEBUG("...\n");
-	// set nonblocking
-	// select fd 1
-	// connect
-	if(connect(fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-		//		DEBUG("error : connect failed, %d\n", fd);
-		close(fd);
-		return -1;
-	}
-	// set blocking
-	DEBUG("...\n");
-
-	return fd;
-}
-
-int open_socket_server(int port)
-{
-	int listenfd = 0;
-	struct sockaddr_in serv_addr; 
-
-	listenfd = socket(AF_INET, SOCK_STREAM, 0);
-
-	int reuse = 1;
-
-	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
-	memset(&serv_addr, '0', sizeof(serv_addr));
-
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	serv_addr.sin_port = htons(port); 
-
-	bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)); 
-
-	listen(listenfd, 10); 
-
-	return listenfd;
-}
-
-int safe_read(int fd, void *buffer, int n)
-{
-	fd_set fds;
-	int cnt;
-
-	if (fd < 0) {
-		return -1;
-	}
-
-	for (;;) {
-		FD_ZERO(&fds);
-		FD_SET(fd, &fds);
-
-		cnt = select(fd+1, &fds, NULL, NULL, NULL);
-		if (cnt < 0) {
-			return -1;
-		}
-
-		//		int size;
-		//		int ret = ioctl(fd, FIONREAD, &size);
-		//		if (ret < 0) return -1;
-		//		if (size == 0) continue;
-
-		cnt = read(fd, buffer, n);
-		if (cnt != 0) {
-			return cnt;
-		}
-
-		if (cnt == 0) return -1;
-	}
-}
-
-int safe_write(int fd, void *buffer, int count)
+int nwrite(int fd, char *buf, int sz)
 {
 	int actual = 0;
 
 	if (fd < 0) return -1;
 
-	while (count > 0) {
-		int n = write(fd, buffer, count);
+	while (sz > 0) {
+		int n = write(fd, buf, sz);
 		if (n < 0 && errno == EINTR) {
 			continue;
 		}
@@ -110,205 +26,120 @@ int safe_write(int fd, void *buffer, int count)
 			break;
 		}
 
-		count  -= n;
+		sz  -= n;
 		actual += n;
-		buffer += n;
+		buf += n;
 	}
 
 	return actual;
 }
 
-//int safe_read(int fd, void *buffer, int n)
-//{
-//	int nread;
-//	int actual = 0;
-//	int sz = 0;
-//	char *p = buffer;
-//	
-//	for (;;) {
-//		nread = read(fd, p, n);
-//		if (nread < 0) {
-//			switch(errno) {
-//				case EINTR:
-//					continue;
-//				case EAGAIN:
-//					return -1;
-//			}
-//			return -1;
-//		} else if (nread == 0) {
-//			return -1;
-//		} else {
-//			n -= nread;
-//			p += nread; 
-//			actual += nread;
-//			if (n <= 0) break;
-//		}
-//	}
-//
-//	return actual;
-//}
-//
-//int safe_write(int fd, void *buffer, int count)
-//{
-//	int nwrite;
-//	int sz = 0;
-//	char *p = buffer;
-//	int actual = 0;
-//	for (;;) {
-//		nwrite = write(fd, p, count);
-//		if (nwrite < 0) {
-//			switch(errno) {
-//				case EINTR:
-//					continue;
-//				case EAGAIN:
-//					return -1;
-//			}
-//			return -1;
-//		} else if (nwrite == 0) {
-//			return -1;
-//		} else {
-//			count -= nwrite;
-//			p += nwrite; 
-//			actual += nwrite;
-//			if (count <= 0) break;
-//		}
-//	}
-//
-//	return actual;
-//}
-
-int read_byte(int fd, struct recv *recv, char *ch)
+int nread(int fd, char *buf, int sz)
 {
-	if (recv->bufpos >= recv->bufused) {
-		for (;;) {
-			int n = safe_read(fd, recv->buffer, 
-					sizeof(recv->buffer));
-			if (n < 0) {
-				switch (errno) {
-					case EAGAIN:
-						return -1;
-					case EINTR:
-						continue;
-				}
-				return -1;
-			} else if (n > 0) {
-				recv->bufpos = 0;
-				recv->bufused = n;
-				break;
-			}
+	int actual = 0;
+	if (fd < 0) return -1;
+	
+	while (sz > 0) {
+		int n = read(fd, buf, sz);
+		if (n < 0 && errno == EINTR) {
+			continue;
 		}
+
+		if (n <= 0) {
+			actual = -1;
+			break;
+		}
+
+		sz -= n;
+		actual += n;
+		buf += n;		
 	}
 
-	*ch = recv->buffer[recv->bufpos++];
-	return 0;
+	return actual;
 }
 
-int read_stream(int fd, struct recv *recv, char *dest, int sz)
+int do_connect(char *ip, int port)
 {
-	int preread, left;
-	int i;
+	int fd;
+	struct sockaddr_in serv_addr;
+	if((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+		return -1;
+	}
+	memset(&serv_addr, '0', sizeof(serv_addr));
 
-	if (sz <= (recv->bufused - recv->bufpos)) {
-		memcpy(dest, &recv->buffer[recv->bufpos], sz);
-		recv->bufpos += sz;
-	} else {
-		preread = recv->bufused - recv->bufpos;
-		memcpy(dest, &recv->buffer[recv->bufpos], preread);
-		recv->bufpos = recv->bufused;
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_port = htons(port);
 
-		left = sz - preread;
-		for (i = 0; i < left; i++) {
-			char ch;
-			int ret = read_byte(fd, recv, &ch);
-			if (ret < 0) return -1;
-			(dest+preread)[i] = ch;
-		}
-	}	
-	return 0;
+	if(inet_pton(AF_INET, ip, &serv_addr.sin_addr)<=0) {
+		goto _failed;
+	}
+
+	if(connect(fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+		goto _failed;
+	}
+
+	return fd;
+_failed:
+	close(fd);
+	return -1;
 }
 
-int get_rand(int start, int end)
-{
+int do_listen(const char * host, int port, int backlog) {
+	// only support ipv4
+	// todo: support ipv6 by getaddrinfo
+	uint32_t addr = INADDR_ANY;
+	if (host[0]) {
+		addr = inet_addr(host);
+	}
+	int listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (listen_fd < 0) {
+		return -1;
+	}
+	int reuse = 1;
+	if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, (void *)&reuse, sizeof(int))==-1) {
+		goto _failed;
+	}
 
-	struct timeval tpstart;
-	gettimeofday(&tpstart, NULL);
-	srand(tpstart.tv_usec);
-	//	srand((unsigned)(time(NULL)));
-
-	int offsize = end - start;
-	int n = (int)(offsize*1.0*rand()/(RAND_MAX+1.0));	
-
-	n += start;
-
-	return n;
+	struct sockaddr_in my_addr;
+	memset(&my_addr, 0, sizeof(struct sockaddr_in));
+	my_addr.sin_family = AF_INET;
+	my_addr.sin_port = htons(port);
+	my_addr.sin_addr.s_addr = addr;
+	if (bind(listen_fd, (struct sockaddr *)&my_addr, sizeof(struct sockaddr)) == -1) {
+		goto _failed;
+	}
+	if (listen(listen_fd, backlog) == -1) {
+		goto _failed;
+	}
+	return listen_fd;
+_failed:
+	close(listen_fd);
+	return -1;
 }
 
-void int24_encode(uint32_t x, unsigned char buf[3])
+
+int parse_endpoint(char *endpoint, char *ip, int *port)
 {
-	buf[0] = (uint8_t)(x >> 16 & 0xff);
-	buf[1] = (uint8_t)(x >> 8  & 0xff);
-	buf[2] = (uint8_t)(x & 0xff);
-}
-
-void int24_decode(unsigned char buf[3], uint32_t *x)
-{
-	*x = (uint32_t)(buf[0] << 16 | buf[1] << 8 | buf[2]);
-}
-
-ssize_t tread(int fd, void *buf, size_t nbytes, unsigned int timeout)
-{
-	int nfds;
-	fd_set readfds;
-	struct timeval tv;
-	tv.tv_sec = timeout;
-	tv.tv_usec = 0;
-
-	FD_ZERO(&readfds);
-	FD_SET(fd, &readfds);
-
-	nfds = select(fd+1, &readfds, NULL, NULL, &tv);
-	if (nfds <= 0) {
-		if (nfds == 0) 
-			errno = ETIME;
+	char *t;
+	char *delim = strchr(endpoint, ':');
+	if (!delim) {
 		return -1;
 	}
 
-	return (read(fd, buf, nbytes));
-}
+	t = endpoint;
+	while (t != delim)
+		*ip++ = *t++;
+	*ip = '\0';
 
-ssize_t treadn(int fd, void *buf, size_t nbytes, unsigned int timeout)
-{
-	size_t nleft;
-	ssize_t nread;
+	t++;
+	char buf[16];
+	char *q = buf;
+	while (*t != '\0')
+		*q++ = *t++;
+	*q = '\0';
+	t++;
 
-	nleft = nbytes;
-	while (nleft > 0) {
-		if ((nread == tread(fd, buf, nleft, timeout)) < 0) {
-			if (nleft == nbytes) {
-				return -1;
-			} else {
-				break;
-			}
-		} else if (nread == 0) {
-			break;
-		}
-		nleft -= nread;
-		buf += nread;
-	}
+	*port = atoi(buf);
 
-	return (nbytes - nleft); // return >= 0
-}
-
-void read_file (const char *filename , struct slice *slice) {
-	FILE *f = fopen(filename, "rb");
-	if (f == NULL) {
-		fprintf(stderr, "Can't open file %s\n", filename);
-		exit(1);
-	}
-	fseek(f,0,SEEK_END);
-	slice->len = ftell(f);
-	fseek(f,0,SEEK_SET);
-	slice->buffer = malloc(slice->len);
-	fread(slice->buffer, 1 , slice->len , f);
-	fclose(f);
+	return 0;
 }

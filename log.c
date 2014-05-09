@@ -1,136 +1,87 @@
 #include "log.h"
-#include <stdarg.h>
+#include "queue.h"
 #include <string.h>
+#include <errno.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <pthread.h>
-#include <time.h>
-#include "debug.h"
+#include <assert.h>
 
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+static FILE *_L = NULL;
+static struct queue *_Q = NULL;
 
-static FILE *warning_fp;
-static FILE *info_fp;
-static FILE *trace_fp;
-static FILE *err_fp;
+static int _debug_info = 0;
+static int _debug_warning = 0;
+static int _debug_err = 0;
 
-void log_print(int level, int use, const char *file, int line, const char *function, const char *format, ...)
+static int _log_info = 0;
+static int _log_warning = 0;
+static int _log_err = 0;
+
+struct _log_message {
+	char print[255];
+};
+
+static int MAGIC_NO = 0;
+
+static void *_thread_working(void *arg)
 {
-#ifdef LOG_PRINT
+	while (1) {
+		struct _log_message *msg = queue_pop(_Q, NULL);
+		fprintf(_L, "%s\n", msg->print);
+		free(msg);
+	}
 
-	va_list ap;
+	return (void *)NULL;	
+}
 
-#define MAX_SIZE_PRINT 4096
-	char print[MAX_SIZE_PRINT];
-	memset(print, 0, MAX_SIZE_PRINT);
-
-	if (level < 0 || !use)
+void log_init(char *logfile, int debug_info, int debug_warning, int debug_err,
+				int log_info, int log_warning, int log_err)
+{	
+	if (_L || _Q) {
 		return;
-
-	char info []   = "[INFO]";
-	char trace[]   = "[TRACE]";
-	char warning[] = "[WARNING]";
-	char error[]   = "[ERROR]";
-
-	char *t;
-	FILE *log_fp;
-	switch (level) {
-		case 0:
-			if (info_fp) {
-				log_fp = info_fp;
-			}
-			t = info;
-			break;
-		case 1:
-			if (trace_fp) {
-				log_fp = trace_fp;
-			}
-			t = trace;
-			break;
-		case 2:
-			if (warning_fp) {
-				log_fp = warning_fp;
-			}
-			t = warning;
-			break;
-		case 3:
-			if (err_fp) {
-				log_fp = err_fp;
-			}
-			t = error;
-			break;	
-		default:
-			log_fp = NULL;
-			return;
+	}
+	_Q = queue_create();
+	_L = fopen(logfile, "a+");
+	if (_L == NULL) {
+		fprintf(stderr, "[log] %s\n", strerror(errno));
+		return;
 	}
 
-	pthread_mutex_lock(&lock);
-	sprintf(print, "%s:%s:%d:", t, file, line);
+	_debug_info = debug_info;
+	_debug_warning = debug_warning;
+	_debug_err = debug_err;
+	
+	_log_info = log_info;
+	_log_warning = log_warning;
+	_log_err = log_err;
 
-	t = print + strlen(print);
+	pthread_t tid_log;
+	int ret = pthread_create(&tid_log, NULL, _thread_working, (void *)NULL);
+	assert(ret == 0);
 
-	va_start(ap, format);
-	vsprintf(t, format, ap);
-	va_end(ap);
-
-	time_t ts;
-	time(&ts);
-	struct tm *tm = localtime(&ts);
-
-	char tstamp[255];
-	sprintf(tstamp, "{%02d-%02d-%02d %02d:%02d:%02d}",
-			tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);	
-
-	if (log_fp) {
-		fprintf(log_fp, "%s:%s", tstamp, print);
-		fflush(log_fp);
-	}
-
-	pthread_mutex_unlock(&lock);
-#endif
+	MAGIC_NO = 0x1234;
 }
 
-void log_init(char *info, char *warning, char *trace, char *err)
+int log_test()
 {
-#ifdef LOG_PRINT
-	// TODO: set thread deattach
-	if (info) {
-		info_fp = fopen(info, "a+");
-		assert(info_fp);
+	if (MAGIC_NO != 0x1234) {
+		return -1;
 	}
-
-	if (trace) {
-		trace_fp = fopen(trace, "a+");
-		assert(trace_fp);
-	}
-
-	if (warning) {
-		warning_fp = fopen(warning, "a+");
-		assert(warning_fp);
-	}
-
-	if (err) {
-		err_fp = fopen(err, "a+");
-		assert(err_fp);
-	}
-#endif
+	return 0;
 }
 
-void log_destroy()
+void log_print(int level,
+                const char *file,
+                int line,
+                const char *format,
+                ...)
 {
-	if (info_fp) {
-		fclose(info_fp);
-	}
-
-	if (trace_fp) {
-		fclose(trace_fp);
-	}
-
-	if (warning_fp) {
-		fclose(warning_fp);
-	}
-
-	if (err_fp) {
-		fclose(err_fp);
-	}
+//	char tmp[255];
+//	switch (level) {				
+	// TODO
+	fprintf(stdout, "[test log]:%s:%d:Hello World\n", file, line);
+	fprintf(_L,     "[test log]:%s:%d:Hello World\n", file, line);
+	fflush(stdout);
+	fflush(_L);
+					
 }

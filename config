@@ -1,0 +1,13 @@
+[mrshd]
+	debug_info = 1;
+	debug_warning = 1;
+	debug_err = 1;
+	log_info = 1;
+	log_warning = 1;
+	log_err = 1;
+	endpoint = 127.0.0.1:9000;
+	serial = /dev/ttyUSB0;
+	db = mrshd.db;
+	log = mrshd.log;
+	freq_read_serial = 10;
+	freq_push_rdata  = 10;
