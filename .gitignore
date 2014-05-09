@@ -7,7 +7,6 @@ a.out
 core
 sqlite
 *.so.*
-*.[io]
 Thumbs.db
 *.html
 .tmp*~
@@ -29,3 +28,8 @@ config.log
 aclocal.m4
 .deps/
 .deps/*
+mrshd
+sqlite3
+sqlite
+*.[iaoS]
+*.swp
